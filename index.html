@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Informativos UPA - Áudios Locais</title>
+</head>
+<body style="background-color: #121212; color: #ffffff; text-align: center; font-family: Arial, sans-serif; padding-top: 50px;">
+
+    <h1>Sistema de Informativos</h1>
+    <p>Intervalo programado: 10 minutos.</p>
+
+    <audio id="player-avisos"></audio>
+
+    <script>
+        const listaDeAudios = [
+            "audios/preferencia_lugar.mp3",
+            "audios/atestado_atendimento.mp3",
+            "audios/declaracao_atendimento.mp3",
+            "audios/entregar_prontuario.mp3"
+        ];
+
+        let indiceAtual = 0;
+        const tempoDeIntervalo = 30000; 
+        
+        const player = document.getElementById('player-avisos');
+        const statusTela = document.getElementById('status-tela');
+
+        function tocarProximoAviso() {
+            if (listaDeAudios.length === 0) return; 
+
+            const audioDaVez = listaDeAudios[indiceAtual];
+            
+            player.src = audioDaVez;
+            
+            player.play()
+                .then(() => {
+                    console.log(`Tocando agora: ${audioDaVez}`);
+                    statusTela.innerText = `Último áudio tocado: ${audioDaVez}`;
+                })
+                .catch(erro => {
+                    console.error(`Erro ao tocar ${audioDaVez}. O arquivo existe? O autoplay está liberado?`, erro);
+                    statusTela.innerText = `Erro ao tentar tocar: ${audioDaVez}`;
+                });
+
+            indiceAtual++;
+
+            if (indiceAtual >= listaDeAudios.length) {
+                indiceAtual = 0;
+            }
+        }
+
+        setInterval(tocarProximoAviso, tempoDeIntervalo);
+
+        // ATENÇÃO: O setInterval vai esperar os primeiros 10 minutos passarem para tocar o primeiro áudio.
+        // Se você quiser que o primeiro áudio toque IMEDIATAMENTE assim que o PC ligar/abrir a aba,
+        // remova as duas barras (//) da linha abaixo:
+        
+        // tocarProximoAviso();
+
+    </script>
+</body>
+</html>
