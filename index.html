@@ -2,60 +2,129 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Informativos UPA - Áudios Locais</title>
+    <title>Informativos UPA - Painel de Áudio</title>
+    <style>
+        body {
+            background-color: #121212; 
+            color: #ffffff; 
+            text-align: center; 
+            font-family: Arial, sans-serif; 
+            padding-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            margin: 0;
+        }
+        #container {
+            border: 2px solid #333;
+            padding: 40px;
+            border-radius: 20px;
+            background-color: #1e1e1e;
+        }
+        h1 { color: #0084ff; margin-bottom: 10px; }
+        #status-tela { color: #888; font-size: 18px; margin-top: 20px; }
+        
+        button {
+            padding: 25px 50px;
+            font-size: 22px;
+            font-weight: bold;
+            background-color: #0084ff;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+        button:hover {
+            background-color: #0066cc;
+            transform: scale(1.05);
+        }
+        button:active { transform: scale(0.95); }
+        
+        .timer-info {
+            font-size: 14px;
+            color: #555;
+            margin-top: 30px;
+        }
+    </style>
 </head>
-<body style="background-color: #121212; color: #ffffff; text-align: center; font-family: Arial, sans-serif; padding-top: 50px;">
+<body>
 
-    <h1>Sistema de Informativos</h1>
-    <p>Intervalo programado: 10 minutos.</p>
-    
-    <p style="color: #888; font-size: 14px;" id="status-tela">Aguardando o primeiro ciclo...</p>
+    <div id="container">
+        <h1>Sistema de Informativos</h1>
+        
+        <div id="sessao-inicio">
+            <p>Para ativar os informativos sonoros na recepção:</p>
+            <button id="btn-iniciar">▶ INICIAR SISTEMA DE ÁUDIO</button>
+        </div>
+
+        <p id="status-tela" style="display: none;">Sistema ativo. Aguardando intervalo...</p>
+        
+        <div class="timer-info">Intervalo programado: 20 minutos</div>
+    </div>
 
     <audio id="player-avisos"></audio>
 
     <script>
+        // Configurações
         const listaDeAudios = [
             "audios/preferencia_lugar.mp3",
             "audios/atestado_atendimento.mp3",
             "audios/declaracao_atendimento.mp3",
             "audios/ordem_chegada.mp3",
-            "audios/registro_evasao.mp3",
-            "audios/entregar_prontuario.mp3"
+            "audios/registro_evasao.mp3"
         ];
 
         let indiceAtual = 0;
-        const tempoDeIntervalo = 50000; 
+        const tempoDeIntervalo = 1200000; // 20 minutos (20 * 60 * 1000)
         
         const player = document.getElementById('player-avisos');
         const statusTela = document.getElementById('status-tela');
+        const btnIniciar = document.getElementById('btn-iniciar');
+        const sessaoInicio = document.getElementById('sessao-inicio');
 
         function tocarProximoAviso() {
             if (listaDeAudios.length === 0) return; 
 
             const audioDaVez = listaDeAudios[indiceAtual];
-            
             player.src = audioDaVez;
             
             player.play()
                 .then(() => {
-                    console.log(`Tocando agora: ${audioDaVez}`);
-                    statusTela.innerText = `Último áudio tocado: ${audioDaVez}`;
+                    console.log(`Sucesso: ${audioDaVez}`);
+                    const agora = new Date().toLocaleTimeString('pt-BR');
+                    statusTela.innerText = `Último informativo: ${audioDaVez} às ${agora}`;
                 })
                 .catch(erro => {
-                    console.error(`Erro ao tocar ${audioDaVez}. O arquivo existe? O autoplay está liberado?`, erro);
-                    statusTela.innerText = `Erro ao tentar tocar: ${audioDaVez}`;
+                    console.error("Erro ao tocar áudio:", erro);
+                    statusTela.innerText = "Erro ao reproduzir. Verifique os arquivos na pasta /audios.";
                 });
 
+            // Lógica de Rodízio
             indiceAtual++;
-
             if (indiceAtual >= listaDeAudios.length) {
                 indiceAtual = 0;
             }
         }
 
-        setInterval(tocarProximoAviso, tempoDeIntervalo);
+        // Função que dispara quando o usuário clica no botão
+        btnIniciar.addEventListener('click', function() {
+            // 1. Esconde o botão e mostra o status
+            sessaoInicio.style.display = 'none';
+            statusTela.style.display = 'block';
+            statusTela.innerText = "Sistema iniciado! Tocando o primeiro aviso...";
 
+            // 2. Toca o primeiro áudio imediatamente
+            tocarProximoAviso();
 
+            // 3. Inicia o loop de 20 em 20 minutos
+            setInterval(tocarProximoAviso, tempoDeIntervalo);
+            
+            console.log("Interface destravada e loop iniciado.");
+        });
     </script>
 </body>
 </html>
